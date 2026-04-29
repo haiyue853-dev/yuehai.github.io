@@ -1,0 +1,38 @@
+[
+    {
+        "id": 1,
+        "title": "欢迎来到我的博客",
+        "excerpt": "这是我的第一篇博客文章，欢迎大家来访！我会在这里分享我的学习心得和技术文章。",
+        "file": "article-1.html",
+        "date": "2024-01-01",
+        "tag": "随笔",
+        "image": "../images/article-1.jpg"
+    },
+    {
+        "id": 2,
+        "title": "JavaScript 入门指南",
+        "excerpt": "本文将带你快速入门JavaScript，了解基本语法、数据类型和常用函数。",
+        "file": "article-2.html",
+        "date": "2024-01-15",
+        "tag": "技术",
+        "image": "../images/article-2.jpg"
+    },
+    {
+        "id": 3,
+        "title": "CSS3 动画实战",
+        "excerpt": "学习如何使用CSS3创建炫酷的动画效果，让你的网页更加生动有趣。",
+        "file": "article-3.html",
+        "date": "2024-02-01",
+        "tag": "前端",
+        "image": "../images/article-3.jpg"
+    },
+    {
+        "id": 4,
+        "title": "响应式网页设计",
+        "excerpt": "了解响应式设计的核心理念，学会制作适配各种设备的网页。",
+        "file": "article-4.html",
+        "date": "2024-02-15",
+        "tag": "前端",
+        "image": "../images/article-4.jpg"
+    }
+]
