@@ -6,7 +6,7 @@
         "file": "article-1.html",
         "date": "2024-01-01",
         "tag": "随笔",
-        "image": "../images/article-1.jpg"
+        "image": "../images/articles/article-1.jpg"
     },
     {
         "id": 2,
@@ -15,7 +15,7 @@
         "file": "article-2.html",
         "date": "2024-01-15",
         "tag": "技术",
-        "image": "../images/article-2.jpg"
+        "image": "../images/articles/article-2.jpg"
     },
     {
         "id": 3,
@@ -24,7 +24,7 @@
         "file": "article-3.html",
         "date": "2024-02-01",
         "tag": "前端",
-        "image": "../images/article-3.jpg"
+        "image": "../images/articles/article-3.jpg"
     },
     {
         "id": 4,
@@ -33,6 +33,6 @@
         "file": "article-4.html",
         "date": "2024-02-15",
         "tag": "前端",
-        "image": "../images/article-4.jpg"
+        "image": "../images/articles/article-4.jpg"
     }
 ]
