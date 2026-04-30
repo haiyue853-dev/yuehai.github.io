@@ -21,28 +21,29 @@ function initMobileMenu() {
     const menuToggle = document.getElementById('menuToggle');
     const navLinks = document.querySelector('.nav-links');
 
-    menuToggle.addEventListener('click', function () {
-        navLinks.classList.toggle('active');
+    function openMenu() {
+        navLinks.classList.add('active');
+        menuToggle.classList.add('active');
+    }
 
-        const spans = menuToggle.querySelectorAll('span');
+    function closeMenu() {
+        navLinks.classList.remove('active');
+        menuToggle.classList.remove('active');
+    }
+
+    menuToggle.addEventListener('click', function () {
         if (navLinks.classList.contains('active')) {
-            spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
-            spans[1].style.opacity = '0';
-            spans[2].style.transform = 'rotate(-45deg) translate(7px, -6px)';
+            closeMenu();
         } else {
-            spans[0].style.transform = 'none';
-            spans[1].style.opacity = '1';
-            spans[2].style.transform = 'none';
+            openMenu();
         }
     });
 
     document.querySelectorAll('.nav-links a').forEach(link => {
-        link.addEventListener('click', () => {
-            navLinks.classList.remove('active');
-            const spans = menuToggle.querySelectorAll('span');
-            spans[0].style.transform = 'none';
-            spans[1].style.opacity = '1';
-            spans[2].style.transform = 'none';
+        link.addEventListener('click', function() {
+            closeMenu();
+            document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('active'));
+            this.classList.add('active');
         });
     });
 }
@@ -56,36 +57,143 @@ async function loadArticles() {
         const articles = await response.json();
 
         if (!articles || articles.length === 0) {
-            grid.innerHTML = '<p style="color: white; text-align: center; grid-column: 1/-1;">暂无文章</p>';
+            grid.innerHTML = '<p style="color: white; text-align: center; grid-column: 1/-1;">暂无随笔</p>';
             return;
         }
 
-        grid.innerHTML = articles.map(article => `
-            <article class="article-card" data-file="${article.file}">
-                <div class="article-image-container">
-                    <img src="${article.image}" alt="${article.title}" class="article-image" 
-                         onerror="this.style.background='linear-gradient(135deg, #667eea 0%, #764ba2 100%)'; this.style.height='200px'; this.style.width='100%'">
-                </div>
-                <div class="article-content">
-                    <h3 class="article-title">${article.title}</h3>
-                    <p class="article-excerpt">${article.excerpt}</p>
-                    <div class="article-meta">
-                        <span class="article-date">
-                            <i class="fas fa-calendar"></i>
-                            ${article.date}
-                        </span>
-                        <span class="article-tag">${article.tag}</span>
-                    </div>
-                </div>
-            </article>
-        `).join('');
+        const pageSize = 6;
+        let currentPage = 1;
+        const totalPages = Math.ceil(articles.length / pageSize);
 
-        document.querySelectorAll('.article-card').forEach(card => {
-            card.addEventListener('click', function () {
-                const file = this.dataset.file;
-                openArticle(file);
+        let pagination = document.getElementById('articlesPagination');
+        if (!pagination) {
+            pagination = document.createElement('div');
+            pagination.id = 'articlesPagination';
+            pagination.className = 'pagination';
+            grid.parentElement.appendChild(pagination);
+        }
+
+        function renderPage(page, shouldScroll = false) {
+            currentPage = page;
+            const start = (currentPage - 1) * pageSize;
+            const end = start + pageSize;
+            const currentArticles = articles.slice(start, end);
+
+            grid.innerHTML = currentArticles.map(article => `
+                <article class="article-card" data-file="${article.file}">
+                    <div class="article-image-container">
+                        <img src="${article.image}" alt="${article.title}" class="article-image" 
+                             onerror="this.style.background='linear-gradient(135deg, #667eea 0%, #764ba2 100%)'; this.style.height='200px'; this.style.width='100%'">
+                    </div>
+                    <div class="article-content">
+                        <h3 class="article-title">${article.title}</h3>
+                        <p class="article-excerpt">${article.excerpt}</p>
+                        <div class="article-meta">
+                            <span class="article-date">
+                                <i class="fas fa-calendar"></i>
+                                ${article.date}
+                            </span>
+                            <span class="article-tag">${article.tag}</span>
+                        </div>
+                    </div>
+                </article>
+            `).join('');
+
+            document.querySelectorAll('.article-card').forEach(card => {
+                card.addEventListener('click', function () {
+                    const file = this.dataset.file;
+                    openArticle(file);
+                });
             });
-        });
+
+            renderPagination();
+
+            if (shouldScroll) {
+                const headerHeight = document.querySelector('.header').offsetHeight;
+                const sectionTop = document.getElementById('articles').offsetTop - headerHeight - 8;
+                window.scrollTo({
+                    top: Math.max(sectionTop, 0),
+                    behavior: 'smooth'
+                });
+            }
+        }
+
+        function renderPagination() {
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+                return;
+            }
+
+            const prevDisabled = currentPage === 1 ? 'disabled' : '';
+            const nextDisabled = currentPage === totalPages ? 'disabled' : '';
+
+            function getPageItems(total, current) {
+                if (total <= 7) {
+                    return Array.from({ length: total }, (_, i) => i + 1);
+                }
+
+                const items = [1];
+                const start = Math.max(2, current - 1);
+                const end = Math.min(total - 1, current + 1);
+
+                if (start > 2) {
+                    items.push('ellipsis-left');
+                }
+
+                for (let i = start; i <= end; i++) {
+                    items.push(i);
+                }
+
+                if (end < total - 1) {
+                    items.push('ellipsis-right');
+                }
+
+                items.push(total);
+                return items;
+            }
+
+            const pageItems = getPageItems(totalPages, currentPage);
+            const pageButtons = pageItems.map(item => {
+                if (typeof item === 'string') {
+                    return '<span class="page-ellipsis">...</span>';
+                }
+                return `<button class="page-btn ${item === currentPage ? 'active' : ''}" data-page="${item}">${item}</button>`;
+            }).join('');
+
+            pagination.innerHTML = `
+                <button class="page-btn nav-btn" data-action="prev" ${prevDisabled}>上一页</button>
+                ${pageButtons}
+                <button class="page-btn nav-btn" data-action="next" ${nextDisabled}>下一页</button>
+            `;
+
+            pagination.querySelectorAll('.page-btn[data-page]').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const page = Number(this.dataset.page);
+                    renderPage(page, true);
+                });
+            });
+
+            const prevBtn = pagination.querySelector('[data-action="prev"]');
+            const nextBtn = pagination.querySelector('[data-action="next"]');
+
+            if (prevBtn) {
+                prevBtn.addEventListener('click', function () {
+                    if (currentPage > 1) {
+                        renderPage(currentPage - 1, true);
+                    }
+                });
+            }
+
+            if (nextBtn) {
+                nextBtn.addEventListener('click', function () {
+                    if (currentPage < totalPages) {
+                        renderPage(currentPage + 1, true);
+                    }
+                });
+            }
+        }
+
+        renderPage(1);
     } catch (error) {
         console.error('加载文章失败:', error);
         grid.innerHTML = '<p style="color: white; text-align: center; grid-column: 1/-1;">加载文章失败</p>';
@@ -113,7 +221,7 @@ async function openArticle(file) {
 
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
-        const title = doc.querySelector('title') ? doc.querySelector('title').textContent : '文章';
+        const title = doc.querySelector('title') ? doc.querySelector('title').textContent : '随笔';
         const articleContent = doc.querySelector('article') ? doc.querySelector('article').innerHTML : html;
 
         const card = document.querySelector(`.article-card[data-file="${file}"]`);
@@ -122,8 +230,10 @@ async function openArticle(file) {
         const tag = card ? card.querySelector('.article-tag').textContent : '';
 
         modal.querySelector('.modal-content').innerHTML = `
-            <img src="${image}" alt="${title}" class="modal-image"
-                 onerror="this.style.background='linear-gradient(135deg, #667eea 0%, #764ba2 100%)'; this.style.height='300px'">
+            <div class="modal-image-wrap">
+                <img src="${image}" alt="${title}" class="modal-image"
+                     onerror="this.style.background='linear-gradient(135deg, #667eea 0%, #764ba2 100%)'; this.style.height='300px'">
+            </div>
             <div class="modal-body">
                 <h2 class="modal-title">${title}</h2>
                 <div class="modal-meta">
