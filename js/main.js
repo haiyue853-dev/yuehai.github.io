@@ -1,9 +1,12 @@
 document.addEventListener('DOMContentLoaded', function () {
     initHeader();
     initMobileMenu();
-    loadArticles();
+    initBlindsGallery();
+    initPageGallery();
+    initImageModal();
     initScrollTop();
     initSmoothScroll();
+    initScrollReveal();
 });
 
 function initHeader() {
@@ -21,256 +24,285 @@ function initMobileMenu() {
     const menuToggle = document.getElementById('menuToggle');
     const navLinks = document.querySelector('.nav-links');
 
-    function openMenu() {
-        navLinks.classList.add('active');
-        menuToggle.classList.add('active');
-    }
-
-    function closeMenu() {
-        navLinks.classList.remove('active');
-        menuToggle.classList.remove('active');
-    }
-
     menuToggle.addEventListener('click', function () {
-        if (navLinks.classList.contains('active')) {
-            closeMenu();
-        } else {
-            openMenu();
-        }
+        navLinks.classList.toggle('active');
     });
 
+    const closeBtn = document.querySelector('.nav-links .close-btn');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function () {
+            navLinks.classList.remove('active');
+        });
+    }
+
     document.querySelectorAll('.nav-links a').forEach(link => {
-        link.addEventListener('click', function() {
-            closeMenu();
+        link.addEventListener('click', function () {
+            navLinks.classList.remove('active');
             document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('active'));
             this.classList.add('active');
         });
     });
 }
 
-async function loadArticles() {
-    const grid = document.getElementById('articlesGrid');
-    grid.innerHTML = '<div class="loading"></div>';
+function initBlindsGallery() {
+    const gallery = document.getElementById('blindsGallery');
+    if (!gallery) return;
 
-    try {
-        const response = await fetch('articles/articles.json');
-        const articles = await response.json();
+    const items = gallery.querySelectorAll('.blinds-item');
+    const dotsContainer = document.getElementById('blindsDots');
+    const prevBtn = document.querySelector('.blinds-btn[data-dir="prev"]');
+    const nextBtn = document.querySelector('.blinds-btn[data-dir="next"]');
+    let currentIndex = 0;
+    let autoPlayTimer = null;
+    let isAnimating = false;
+    const SLICE_COUNT = 6;
 
-        if (!articles || articles.length === 0) {
-            grid.innerHTML = '<p style="color: white; text-align: center; grid-column: 1/-1;">暂无随笔</p>';
-            return;
-        }
+    for (let i = 0; i < items.length; i++) {
+        const dot = document.createElement('span');
+        dot.className = 'dot' + (i === 0 ? ' active' : '');
+        dot.dataset.index = i;
+        dotsContainer.appendChild(dot);
+    }
 
-        const pageSize = 6;
-        let currentPage = 1;
-        const totalPages = Math.ceil(articles.length / pageSize);
+    const dots = dotsContainer.querySelectorAll('.dot');
 
-        let pagination = document.getElementById('articlesPagination');
-        if (!pagination) {
-            pagination = document.createElement('div');
-            pagination.id = 'articlesPagination';
-            pagination.className = 'pagination';
-            grid.parentElement.appendChild(pagination);
-        }
+    function createBlindsTransition(toIndex, direction) {
+        if (isAnimating) return;
+        isAnimating = true;
 
-        function renderPage(page, shouldScroll = false) {
-            currentPage = page;
-            const start = (currentPage - 1) * pageSize;
-            const end = start + pageSize;
-            const currentArticles = articles.slice(start, end);
+        const fromItem = items[currentIndex];
+        const toItem = items[toIndex];
 
-            grid.innerHTML = currentArticles.map(article => `
-                <article class="article-card" data-file="${article.file}">
-                    <div class="article-image-container">
-                        <img src="${article.image}" alt="${article.title}" class="article-image" 
-                             onerror="this.style.background='linear-gradient(135deg, #667eea 0%, #764ba2 100%)'; this.style.height='200px'; this.style.width='100%'">
-                    </div>
-                    <div class="article-content">
-                        <h3 class="article-title">${article.title}</h3>
-                        <p class="article-excerpt">${article.excerpt}</p>
-                        <div class="article-meta">
-                            <span class="article-date">
-                                <i class="fas fa-calendar"></i>
-                                ${article.date}
-                            </span>
-                            <span class="article-tag">${article.tag}</span>
-                        </div>
-                    </div>
-                </article>
-            `).join('');
+        const galleryRect = gallery.getBoundingClientRect();
+        const sliceWidth = galleryRect.width / SLICE_COUNT;
 
-            document.querySelectorAll('.article-card').forEach(card => {
-                card.addEventListener('click', function () {
-                    const file = this.dataset.file;
-                    openArticle(file);
-                });
-            });
-
-            renderPagination();
-
-            if (shouldScroll) {
-                const headerHeight = document.querySelector('.header').offsetHeight;
-                const sectionTop = document.getElementById('articles').offsetTop - headerHeight - 8;
-                window.scrollTo({
-                    top: Math.max(sectionTop, 0),
-                    behavior: 'smooth'
-                });
-            }
-        }
-
-        function renderPagination() {
-            if (totalPages <= 1) {
-                pagination.innerHTML = '';
-                return;
-            }
-
-            const prevDisabled = currentPage === 1 ? 'disabled' : '';
-            const nextDisabled = currentPage === totalPages ? 'disabled' : '';
-
-            function getPageItems(total, current) {
-                if (total <= 7) {
-                    return Array.from({ length: total }, (_, i) => i + 1);
-                }
-
-                const items = [1];
-                const start = Math.max(2, current - 1);
-                const end = Math.min(total - 1, current + 1);
-
-                if (start > 2) {
-                    items.push('ellipsis-left');
-                }
-
-                for (let i = start; i <= end; i++) {
-                    items.push(i);
-                }
-
-                if (end < total - 1) {
-                    items.push('ellipsis-right');
-                }
-
-                items.push(total);
-                return items;
-            }
-
-            const pageItems = getPageItems(totalPages, currentPage);
-            const pageButtons = pageItems.map(item => {
-                if (typeof item === 'string') {
-                    return '<span class="page-ellipsis">...</span>';
-                }
-                return `<button class="page-btn ${item === currentPage ? 'active' : ''}" data-page="${item}">${item}</button>`;
-            }).join('');
-
-            pagination.innerHTML = `
-                <button class="page-btn nav-btn" data-action="prev" ${prevDisabled}>上一页</button>
-                ${pageButtons}
-                <button class="page-btn nav-btn" data-action="next" ${nextDisabled}>下一页</button>
+        const slices = [];
+        for (let i = 0; i < SLICE_COUNT; i++) {
+            const slice = document.createElement('div');
+            slice.className = 'blinds-slice';
+            slice.style.cssText = `
+                position:absolute;top:0;left:${i * sliceWidth}px;width:${sliceWidth}px;height:100%;
+                overflow:hidden;z-index:10;
+                transform:rotateY(${direction === 'next' ? 90 : -90}deg);
+                transform-origin:${direction === 'next' ? 'left center' : 'right center'};
+                transition:transform 0.5s cubic-bezier(0.4,0,0.2,1) ${i * 0.05}s;
+                will-change:transform;
+                backface-visibility:hidden;
             `;
 
-            pagination.querySelectorAll('.page-btn[data-page]').forEach(btn => {
-                btn.addEventListener('click', function () {
-                    const page = Number(this.dataset.page);
-                    renderPage(page, true);
-                });
+            const inner = document.createElement('div');
+            inner.style.cssText = `
+                position:absolute;top:0;left:-${i * sliceWidth}px;
+                width:${galleryRect.width}px;height:100%;
+            `;
+
+            const fromImg = fromItem.querySelector('img');
+            if (fromImg) {
+                const imgClone = fromImg.cloneNode(true);
+                imgClone.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+                inner.appendChild(imgClone);
+            }
+            const fromLabel = fromItem.querySelector('.blinds-label');
+            if (fromLabel) {
+                const labelClone = fromLabel.cloneNode(true);
+                labelClone.style.cssText = 'position:absolute;bottom:0;left:0;right:0;padding:20px;background:linear-gradient(transparent,rgba(0,0,0,0.7));color:white;font-size:1.1rem;font-weight:600;';
+                inner.appendChild(labelClone);
+            }
+
+            slice.appendChild(inner);
+            gallery.appendChild(slice);
+            slices.push(slice);
+        }
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                slices.forEach(s => { s.style.transform = 'rotateY(0deg)'; });
             });
+        });
 
-            const prevBtn = pagination.querySelector('[data-action="prev"]');
-            const nextBtn = pagination.querySelector('[data-action="next"]');
-
-            if (prevBtn) {
-                prevBtn.addEventListener('click', function () {
-                    if (currentPage > 1) {
-                        renderPage(currentPage - 1, true);
-                    }
-                });
-            }
-
-            if (nextBtn) {
-                nextBtn.addEventListener('click', function () {
-                    if (currentPage < totalPages) {
-                        renderPage(currentPage + 1, true);
-                    }
-                });
-            }
-        }
-
-        renderPage(1);
-    } catch (error) {
-        console.error('加载文章失败:', error);
-        grid.innerHTML = '<p style="color: white; text-align: center; grid-column: 1/-1;">加载文章失败</p>';
-    }
-}
-
-async function openArticle(file) {
-    const modal = document.createElement('div');
-    modal.className = 'modal active';
-    modal.innerHTML = `
-        <button class="modal-close">&times;</button>
-        <div class="modal-content">
-            <div class="modal-body">
-                <div class="loading"></div>
-            </div>
-        </div>
-    `;
-
-    document.body.appendChild(modal);
-    document.body.style.overflow = 'hidden';
-
-    try {
-        const response = await fetch(`articles/${file}`);
-        const html = await response.text();
-
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        const title = doc.querySelector('title') ? doc.querySelector('title').textContent : '随笔';
-        const articleContent = doc.querySelector('article') ? doc.querySelector('article').innerHTML : html;
-
-        const card = document.querySelector(`.article-card[data-file="${file}"]`);
-        const image = card ? card.querySelector('.article-image').src : '';
-        const date = card ? card.querySelector('.article-date').textContent.trim() : '';
-        const tag = card ? card.querySelector('.article-tag').textContent : '';
-
-        modal.querySelector('.modal-content').innerHTML = `
-            <div class="modal-image-wrap">
-                <img src="${image}" alt="${title}" class="modal-image"
-                     onerror="this.style.background='linear-gradient(135deg, #667eea 0%, #764ba2 100%)'; this.style.height='300px'">
-            </div>
-            <div class="modal-body">
-                <h2 class="modal-title">${title}</h2>
-                <div class="modal-meta">
-                    <span><i class="fas fa-calendar"></i> ${date}</span>
-                    <span class="article-tag">${tag}</span>
-                </div>
-                <div class="modal-text">${articleContent}</div>
-            </div>
-        `;
-    } catch (error) {
-        modal.querySelector('.modal-body').innerHTML = '<p>加载文章失败</p>';
+        let completed = 0;
+        slices[SLICE_COUNT - 1].addEventListener('transitionend', function handler() {
+            slices[SLICE_COUNT - 1].removeEventListener('transitionend', handler);
+            toItem.classList.add('active');
+            fromItem.classList.remove('active');
+            slices.forEach(s => { if (s.parentNode) s.remove(); });
+            dots.forEach(d => d.classList.remove('active'));
+            dots[toIndex].classList.add('active');
+            currentIndex = toIndex;
+            isAnimating = false;
+        });
     }
 
-    modal.querySelector('.modal-close').addEventListener('click', closeModal);
-    modal.addEventListener('click', function (e) {
-        if (e.target === modal) {
-            closeModal();
+    function goTo(index, direction) {
+        if (isAnimating || index === currentIndex) return;
+        if (index < 0) index = items.length - 1;
+        if (index >= items.length) index = 0;
+        const dir = direction || (index > currentIndex ? 'next' : 'prev');
+        createBlindsTransition(index, dir);
+    }
+
+    function nextSlide() { goTo(currentIndex + 1, 'next'); }
+    function prevSlide() { goTo(currentIndex - 1, 'prev'); }
+
+    if (prevBtn) prevBtn.addEventListener('click', () => { resetAutoPlay(); prevSlide(); });
+    if (nextBtn) nextBtn.addEventListener('click', () => { resetAutoPlay(); nextSlide(); });
+
+    dots.forEach(dot => {
+        dot.addEventListener('click', function () {
+            const index = parseInt(this.dataset.index);
+            if (index !== currentIndex) {
+                resetAutoPlay();
+                goTo(index);
+            }
+        });
+    });
+
+    gallery.addEventListener('click', function () {
+        const activeItem = items[currentIndex];
+        const img = activeItem.querySelector('img');
+        if (img && img.src && !img.src.startsWith('data:')) {
+            openImageModal(img.src);
         }
     });
 
-    document.addEventListener('keydown', function escHandler(e) {
-        if (e.key === 'Escape') {
-            closeModal();
-            document.removeEventListener('keydown', escHandler);
-        }
-    });
+    function startAutoPlay() { autoPlayTimer = setInterval(nextSlide, 4000); }
+    function resetAutoPlay() { clearInterval(autoPlayTimer); startAutoPlay(); }
+
+    startAutoPlay();
+    gallery.addEventListener('mouseenter', () => clearInterval(autoPlayTimer));
+    gallery.addEventListener('mouseleave', startAutoPlay);
 }
 
-function closeModal() {
-    const modal = document.querySelector('.modal');
-    if (modal) {
+function initPageGallery() {
+    const book = document.querySelector('.page-book');
+    if (!book) return;
+
+    const items = book.querySelectorAll('.page-item');
+    const dotsContainer = document.getElementById('pageDots');
+    const prevBtn = document.querySelector('.page-btn[data-dir="prev"]');
+    const nextBtn = document.querySelector('.page-btn[data-dir="next"]');
+    let currentIndex = 0;
+    let isAnimating = false;
+    let autoPlayTimer = null;
+
+    for (let i = 0; i < items.length; i++) {
+        const dot = document.createElement('span');
+        dot.className = 'dot' + (i === 0 ? ' active' : '');
+        dot.dataset.index = i;
+        dotsContainer.appendChild(dot);
+    }
+
+    const dots = dotsContainer.querySelectorAll('.dot');
+
+    function flipTo(toIndex, direction) {
+        if (isAnimating || toIndex === currentIndex) return;
+        isAnimating = true;
+
+        const fromItem = items[currentIndex];
+        const toItem = items[toIndex];
+
+        fromItem.classList.remove('active');
+        fromItem.classList.add('flip-out');
+
+        toItem.classList.add('flip-in');
+
+        const onFlipOutEnd = () => {
+            fromItem.classList.remove('flip-out');
+            fromItem.style.opacity = '0';
+            fromItem.style.pointerEvents = 'none';
+        };
+
+        const onFlipInEnd = () => {
+            toItem.classList.remove('flip-in');
+            toItem.classList.add('active');
+            toItem.style.opacity = '1';
+            toItem.style.pointerEvents = 'auto';
+
+            dots.forEach(d => d.classList.remove('active'));
+            dots[toIndex].classList.add('active');
+            currentIndex = toIndex;
+            isAnimating = false;
+        };
+
+        fromItem.addEventListener('animationend', onFlipOutEnd, { once: true });
+        toItem.addEventListener('animationend', onFlipInEnd, { once: true });
+    }
+
+    function nextSlide() { flipTo((currentIndex + 1) % items.length, 'next'); }
+    function prevSlide() { flipTo((currentIndex - 1 + items.length) % items.length, 'prev'); }
+
+    if (prevBtn) prevBtn.addEventListener('click', () => { resetAutoPlay(); prevSlide(); });
+    if (nextBtn) nextBtn.addEventListener('click', () => { resetAutoPlay(); nextSlide(); });
+
+    dots.forEach(dot => {
+        dot.addEventListener('click', function () {
+            const index = parseInt(this.dataset.index);
+            if (index !== currentIndex) {
+                resetAutoPlay();
+                flipTo(index);
+            }
+        });
+    });
+
+    book.addEventListener('click', function () {
+        const activeItem = items[currentIndex];
+        const img = activeItem.querySelector('img');
+        if (img && img.src && !img.src.startsWith('data:')) {
+            openImageModal(img.src);
+        }
+    });
+
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    book.addEventListener('touchstart', function (e) {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    book.addEventListener('touchend', function (e) {
+        touchEndX = e.changedTouches[0].screenX;
+        const diff = touchStartX - touchEndX;
+        if (Math.abs(diff) > 50) {
+            resetAutoPlay();
+            if (diff > 0) {
+                nextSlide();
+            } else {
+                prevSlide();
+            }
+        }
+    }, { passive: true });
+
+    function startAutoPlay() { autoPlayTimer = setInterval(nextSlide, 5000); }
+    function resetAutoPlay() { clearInterval(autoPlayTimer); startAutoPlay(); }
+
+    startAutoPlay();
+    book.addEventListener('mouseenter', () => clearInterval(autoPlayTimer));
+    book.addEventListener('mouseleave', startAutoPlay);
+}
+
+function initImageModal() {
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('modalImage');
+    const closeBtn = modal.querySelector('.image-modal-close');
+
+    window.openImageModal = function (src) {
+        modalImg.src = src;
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    };
+
+    function closeModal() {
         modal.classList.remove('active');
-        setTimeout(() => {
-            modal.remove();
-            document.body.style.overflow = '';
-        }, 300);
+        document.body.style.overflow = '';
     }
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', function (e) {
+        if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeModal();
+    });
 }
 
 function initScrollTop() {
@@ -288,10 +320,7 @@ function initScrollTop() {
     });
 
     scrollBtn.addEventListener('click', function () {
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 }
 
@@ -303,12 +332,29 @@ function initSmoothScroll() {
             if (target) {
                 const headerHeight = document.querySelector('.header').offsetHeight;
                 const targetPosition = target.offsetTop - headerHeight;
-
-                window.scrollTo({
-                    top: targetPosition,
-                    behavior: 'smooth'
-                });
+                window.scrollTo({ top: targetPosition, behavior: 'smooth' });
             }
         });
     });
+}
+
+function initScrollReveal() {
+    const sections = document.querySelectorAll('.douyin-section, .group-section');
+    sections.forEach(section => {
+        section.style.opacity = '0';
+        section.style.transform = 'translateY(40px)';
+        section.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+    });
+
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.15 });
+
+    sections.forEach(section => observer.observe(section));
 }

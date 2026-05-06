@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>月海的博客</title>
+  <title>YOcean - 素材群</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -15,12 +15,13 @@
 
   <header class="header">
     <nav class="nav">
-      <a href="#" class="logo">Blog</a>
+      <a href="#" class="logo">YOcean素材群</a>
       <ul class="nav-links">
-        
+        <li class="close-btn"><a href="javascript:void(0)">&times;</a></li>
         <li><a href="#home" class="active">首页</a></li>
-        <li><a href="#articles">随笔</a></li>
-        <li><a href="#about">关于</a></li>
+        <li><a href="#douyin">抖音</a></li>
+        <li><a href="#group1">素材群①</a></li>
+        <li><a href="#group2">素材群②</a></li>
       </ul>
       <div class="menu-toggle" id="menuToggle">
         <span></span>
@@ -38,47 +39,139 @@
             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%23ddd%22/><circle cx=%2250%22 cy=%2240%22 r=%2220%22 fill=%22%23bbb%22/><ellipse cx=%2250%22 cy=%2275%22 rx=%2225%22 ry=%2220%22 fill=%22%23bbb%22/></svg>'">
         </div>
         <h1 class="name">月海</h1>
-        <p class="bio">热爱技术，热爱生活</p>
+        <p class="bio">还在苦于剪辑没素材吗？</p>
         <div class="social-links">
-          <a href="mailto:1905499552@qq.com" class="social-item" title="邮箱">
+          <a href="mailto:2138286174@qq.com" class="social-item" title="邮箱">
             <i class="fas fa-envelope"></i>
           </a>
           <a href="https://github.com/haiyue853-dev" target="_blank" class="social-item" title="GitHub">
             <i class="fab fa-github"></i>
           </a>
+          <a href="#douyin" class="social-item douyin-icon" title="抖音">
+            <i class="fab fa-tiktok"></i>
+          </a>
+        </div>
+      </div>
+      <div class="scroll-hint">
+        <span>向下滑动</span>
+        <i class="fas fa-chevron-down"></i>
+      </div>
+    </section>
+
+    <section id="douyin" class="douyin-section">
+      <h2 class="section-title">抖音主页</h2>
+      <div class="douyin-card">
+        <div class="douyin-profile">
+          <img src="images/douyin-profile.jpg" alt="抖音个人主页"
+            onerror="this.parentElement.innerHTML='<div class=\'douyin-placeholder\'><i class=\'fab fa-tiktok\'></i><p>抖音主页截图</p></div>'">
+        </div>
+        <div class="douyin-info">
+          <h3>月海</h3>
+          <p>私信我，获取超多素材</p>
+          <a href="https://www.douyin.com/" target="_blank" class="douyin-link">
+            <i class="fab fa-tiktok"></i>
+            <span>前往抖音主页</span>
+            <i class="fas fa-arrow-right"></i>
+          </a>
         </div>
       </div>
     </section>
 
-    <section id="articles" class="articles-section">
-      <h2 class="section-title">随笔</h2>
-      <div class="articles-grid" id="articlesGrid">
+    <section id="group1" class="group-section">
+      <h2 class="section-title">素材群①</h2>
+      <p class="section-desc">点击查看大图</p>
+      <div class="blinds-gallery" id="blindsGallery">
+        <div class="blinds-item active" data-index="0">
+          <img src="images/group1-img1.jpg" alt="素材1"
+            onerror="this.style.background='linear-gradient(135deg, #667eea 0%, #764ba2 100%)'; this.style.height='100%'">
+
+        </div>
+        <div class="blinds-item" data-index="1">
+          <img src="images/group1-img2.jpg" alt="素材2"
+            onerror="this.style.background='linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'; this.style.height='100%'">
+
+        </div>
+        <div class="blinds-item" data-index="2">
+          <img src="images/group1-img3.jpg" alt="素材3"
+            onerror="this.style.background='linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'; this.style.height='100%'">
+
+        </div>
+        <div class="blinds-item" data-index="3">
+          <img src="images/group1-img4.jpg" alt="素材4"
+            onerror="this.style.background='linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)'; this.style.height='100%'">
+
+        </div>
+        <div class="blinds-item" data-index="4">
+          <img src="images/group1-img5.jpg" alt="素材5"
+            onerror="this.style.background='linear-gradient(135deg, #fa709a 0%, #fee140 100%)'; this.style.height='100%'">
+
+        </div>
+        <div class="blinds-item" data-index="5">
+          <img src="images/group1-img6.jpg" alt="素材6"
+            onerror="this.style.background='linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)'; this.style.height='100%'">
+
+        </div>
+      </div>
+      <div class="blinds-controls">
+        <button class="blinds-btn" data-dir="prev"><i class="fas fa-chevron-left"></i></button>
+        <div class="blinds-dots" id="blindsDots"></div>
+        <button class="blinds-btn" data-dir="next"><i class="fas fa-chevron-right"></i></button>
       </div>
     </section>
 
-    <section id="about" class="about-section">
-      <div class="about-content">
-        <h2 class="section-title">关于我</h2>
-        <p>你好！我是月海，来自厦门理工学院计算机科学与技术专业的大三学生。</p>
-        <p>目前正在努力寻找前端实习岗位，喜欢折腾各种有趣的前端技术。</p>
-        <p>欢迎来到我的个人博客，在这里我会分享学习心得和技术随笔。</p>
-        <div class="contact-info">
-          <a href="mailto:1905499552@qq.com" class="contact-item">
-            <i class="fas fa-envelope"></i>
-            <span>1905499552@qq.com</span>
-          </a>
-          <a href="https://github.com/haiyue853-dev" target="_blank" class="contact-item">
-            <i class="fab fa-github"></i>
-            <span>GitHub</span>
-          </a>
+    <section id="group2" class="group-section">
+      <h2 class="section-title">素材群②</h2>
+      <p class="section-desc">点击查看大图</p>
+      <div class="page-gallery" id="pageGallery">
+        <div class="page-book">
+          <div class="page-item active" data-index="0">
+            <img src="images/group2-img1.jpg" alt="素材1"
+              onerror="this.style.background='linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)'; this.style.height='100%'">
+
+          </div>
+          <div class="page-item" data-index="1">
+            <img src="images/group2-img2.jpg" alt="素材2"
+              onerror="this.style.background='linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)'; this.style.height='100%'">
+
+          </div>
+          <div class="page-item" data-index="2">
+            <img src="images/group2-img3.jpg" alt="素材3"
+              onerror="this.style.background='linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)'; this.style.height='100%'">
+
+          </div>
+          <div class="page-item" data-index="3">
+            <img src="images/group2-img4.jpg" alt="素材4"
+              onerror="this.style.background='linear-gradient(135deg, #fddb92 0%, #d1fdff 100%)'; this.style.height='100%'">
+
+          </div>
+          <div class="page-item" data-index="4">
+            <img src="images/group2-img5.jpg" alt="素材5"
+              onerror="this.style.background='linear-gradient(135deg, #c1dfc4 0%, #deecdd 100%)'; this.style.height='100%'">
+
+          </div>
+          <div class="page-item" data-index="5">
+            <img src="images/group2-img6.jpg" alt="素材6"
+              onerror="this.style.background='linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)'; this.style.height='100%'">
+
+          </div>
+        </div>
+        <div class="page-controls">
+          <button class="page-btn" data-dir="prev"><i class="fas fa-chevron-left"></i></button>
+          <div class="page-dots" id="pageDots"></div>
+          <button class="page-btn" data-dir="next"><i class="fas fa-chevron-right"></i></button>
         </div>
       </div>
     </section>
   </main>
 
   <footer class="footer">
-    <p>&copy; 2024 月海. All rights reserved.</p>
+    <p>&copy; 2026 YOcean. All rights reserved.</p>
   </footer>
+
+  <div class="image-modal" id="imageModal">
+    <button class="image-modal-close">&times;</button>
+    <img src="" alt="大图预览" id="modalImage">
+  </div>
 
   <script src="js/main.js"></script>
 </body>
