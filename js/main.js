@@ -55,7 +55,6 @@ function initBlindsGallery() {
     let currentIndex = 0;
     let autoPlayTimer = null;
     let isAnimating = false;
-    const SLICE_COUNT = 6;
 
     for (let i = 0; i < items.length; i++) {
         const dot = document.createElement('span');
@@ -66,71 +65,40 @@ function initBlindsGallery() {
 
     const dots = dotsContainer.querySelectorAll('.dot');
 
-    function createBlindsTransition(toIndex, direction) {
-        if (isAnimating) return;
+    function createTransition(toIndex, direction) {
+        if (isAnimating || toIndex === currentIndex) return;
         isAnimating = true;
 
         const fromItem = items[currentIndex];
         const toItem = items[toIndex];
 
-        const galleryRect = gallery.getBoundingClientRect();
-        const sliceWidth = galleryRect.width / SLICE_COUNT;
-
-        const slices = [];
-        for (let i = 0; i < SLICE_COUNT; i++) {
-            const slice = document.createElement('div');
-            slice.className = 'blinds-slice';
-            slice.style.cssText = `
-                position:absolute;top:0;left:${i * sliceWidth}px;width:${sliceWidth}px;height:100%;
-                overflow:hidden;z-index:10;
-                transform:rotateY(${direction === 'next' ? 90 : -90}deg);
-                transform-origin:${direction === 'next' ? 'left center' : 'right center'};
-                transition:transform 0.5s cubic-bezier(0.4,0,0.2,1) ${i * 0.05}s;
-                will-change:transform;
-                backface-visibility:hidden;
-            `;
-
-            const inner = document.createElement('div');
-            inner.style.cssText = `
-                position:absolute;top:0;left:-${i * sliceWidth}px;
-                width:${galleryRect.width}px;height:100%;
-            `;
-
-            const fromImg = fromItem.querySelector('img');
-            if (fromImg) {
-                const imgClone = fromImg.cloneNode(true);
-                imgClone.style.cssText = 'width:100%;height:100%;object-fit:cover;';
-                inner.appendChild(imgClone);
-            }
-            const fromLabel = fromItem.querySelector('.blinds-label');
-            if (fromLabel) {
-                const labelClone = fromLabel.cloneNode(true);
-                labelClone.style.cssText = 'position:absolute;bottom:0;left:0;right:0;padding:20px;background:linear-gradient(transparent,rgba(0,0,0,0.7));color:white;font-size:1.1rem;font-weight:600;';
-                inner.appendChild(labelClone);
-            }
-
-            slice.appendChild(inner);
-            gallery.appendChild(slice);
-            slices.push(slice);
-        }
+        toItem.style.opacity = '0';
+        toItem.style.transform = 'scale(1.1)';
+        toItem.classList.add('active');
 
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
-                slices.forEach(s => { s.style.transform = 'rotateY(0deg)'; });
+                fromItem.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                fromItem.style.transform = 'scale(0.95)';
+                fromItem.style.opacity = '0';
+
+                toItem.style.transition = 'opacity 0.5s ease 0.1s, transform 0.5s ease 0.1s';
+                toItem.style.transform = 'scale(1)';
+                toItem.style.opacity = '1';
             });
         });
 
-        let completed = 0;
-        slices[SLICE_COUNT - 1].addEventListener('transitionend', function handler() {
-            slices[SLICE_COUNT - 1].removeEventListener('transitionend', handler);
-            toItem.classList.add('active');
+        setTimeout(() => {
             fromItem.classList.remove('active');
-            slices.forEach(s => { if (s.parentNode) s.remove(); });
+            fromItem.style.transition = '';
+            fromItem.style.transform = '';
+            fromItem.style.opacity = '';
+
             dots.forEach(d => d.classList.remove('active'));
             dots[toIndex].classList.add('active');
             currentIndex = toIndex;
             isAnimating = false;
-        });
+        }, 600);
     }
 
     function goTo(index, direction) {
@@ -138,7 +106,7 @@ function initBlindsGallery() {
         if (index < 0) index = items.length - 1;
         if (index >= items.length) index = 0;
         const dir = direction || (index > currentIndex ? 'next' : 'prev');
-        createBlindsTransition(index, dir);
+        createTransition(index, dir);
     }
 
     function nextSlide() { goTo(currentIndex + 1, 'next'); }
@@ -202,18 +170,31 @@ function initPageGallery() {
         const toItem = items[toIndex];
 
         fromItem.classList.remove('active');
-        fromItem.classList.add('flip-out');
+        toItem.classList.remove('flip-out');
+        toItem.classList.remove('slide-out');
+        toItem.classList.remove('slide-out-reverse');
+        fromItem.classList.remove('flip-in');
+        fromItem.classList.remove('slide-in');
+        fromItem.classList.remove('slide-in-reverse');
 
-        toItem.classList.add('flip-in');
+        void fromItem.offsetWidth;
 
-        const onFlipOutEnd = () => {
-            fromItem.classList.remove('flip-out');
+        if (direction === 'next') {
+            fromItem.classList.add('slide-out');
+            toItem.classList.add('slide-in');
+        } else {
+            fromItem.classList.add('slide-out-reverse');
+            toItem.classList.add('slide-in-reverse');
+        }
+
+        const onSlideOutEnd = () => {
+            fromItem.classList.remove('slide-out', 'slide-out-reverse');
             fromItem.style.opacity = '0';
             fromItem.style.pointerEvents = 'none';
         };
 
-        const onFlipInEnd = () => {
-            toItem.classList.remove('flip-in');
+        const onSlideInEnd = () => {
+            toItem.classList.remove('slide-in', 'slide-in-reverse');
             toItem.classList.add('active');
             toItem.style.opacity = '1';
             toItem.style.pointerEvents = 'auto';
@@ -224,8 +205,8 @@ function initPageGallery() {
             isAnimating = false;
         };
 
-        fromItem.addEventListener('animationend', onFlipOutEnd, { once: true });
-        toItem.addEventListener('animationend', onFlipInEnd, { once: true });
+        fromItem.addEventListener('animationend', onSlideOutEnd, { once: true });
+        toItem.addEventListener('animationend', onSlideInEnd, { once: true });
     }
 
     function nextSlide() { flipTo((currentIndex + 1) % items.length, 'next'); }
