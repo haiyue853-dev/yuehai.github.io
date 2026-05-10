@@ -19,9 +19,12 @@
       <ul class="nav-links">
         <li class="close-btn"><a href="javascript:void(0)">&times;</a></li>
         <li><a href="#home" class="active">首页</a></li>
+        <li><a href="#intro">介绍</a></li>
         <li><a href="#douyin">抖音</a></li>
         <li><a href="#group1">素材群①</a></li>
         <li><a href="#group2">素材群②</a></li>
+        <li><a href="#singles">单卖素材</a></li>
+        <li><a href="#wechat">联系</a></li>
       </ul>
       <div class="menu-toggle" id="menuToggle">
         <span></span>
@@ -58,6 +61,16 @@
       <div class="scroll-hint">
         <span>向下滑动</span>
         <i class="fas fa-chevron-down"></i>
+      </div>
+    </section>
+
+    <section id="intro" class="intro-section">
+      <div class="intro-card">
+        <h2 class="intro-title">相关介绍</h2>
+        <div class="intro-content">
+          <p>1.需要有百度网盘，为什么没有QQ群、微信群？这些群素材是会过期的</p>
+          <p>2.为什么苹果手机不行，苹果手机看不了4K视频，会变成黑色</p>
+        </div>
       </div>
     </section>
 
@@ -168,6 +181,42 @@
           <li>🌈 ......</li>
         </ul>
         <p class="group-desc-tip">适合热爱剪辑的你</p>
+      </div>
+    </section>
+
+    <section id="singles" class="group-section">
+      <h2 class="section-title">以下为单卖的素材--鞠婧祎45r，张元英20r</h2>
+      <p class="section-desc">点击图片查看大图</p>
+      <div class="blinds-gallery" id="singlesGallery">
+        <div class="blinds-item active" data-index="0">
+          <img src="images/singles-img1.png" alt="单卖素材1"
+            onerror="this.style.background='linear-gradient(135deg, #667eea 0%, #764ba2 100%)'; this.style.height='100%'">
+        </div>
+        <div class="blinds-item" data-index="1">
+          <img src="images/singles-img2.png" alt="单卖素材2"
+            onerror="this.style.background='linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'; this.style.height='100%'">
+        </div>
+        <div class="blinds-item" data-index="2">
+          <img src="images/singles-img3.png" alt="单卖素材3"
+            onerror="this.style.background='linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'; this.style.height='100%'">
+        </div>
+        <div class="blinds-item" data-index="3">
+          <img src="images/singles-img4.png" alt="单卖素材4"
+            onerror="this.style.background='linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)'; this.style.height='100%'">
+        </div>
+        <div class="blinds-item" data-index="4">
+          <img src="images/singles-img5.png" alt="单卖素材5"
+            onerror="this.style.background='linear-gradient(135deg, #fa709a 0%, #fee140 100%)'; this.style.height='100%'">
+        </div>
+        <div class="blinds-item" data-index="5">
+          <img src="images/singles-img6.png" alt="单卖素材6"
+            onerror="this.style.background='linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)'; this.style.height='100%'">
+        </div>
+      </div>
+      <div class="blinds-controls">
+        <button class="blinds-btn" data-dir="prev"><i class="fas fa-chevron-left"></i></button>
+        <div class="blinds-dots" id="singlesDots"></div>
+        <button class="blinds-btn" data-dir="next"><i class="fas fa-chevron-right"></i></button>
       </div>
     </section>
 

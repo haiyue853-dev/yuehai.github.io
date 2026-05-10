@@ -1,7 +1,8 @@
 document.addEventListener('DOMContentLoaded', function () {
     initHeader();
     initMobileMenu();
-    initBlindsGallery();
+    initBlindsGallery('#blindsGallery', '#blindsDots');
+    initBlindsGallery('#singlesGallery', '#singlesDots');
     initPageGallery();
     initImageModal();
     initScrollTop();
@@ -44,14 +45,14 @@ function initMobileMenu() {
     });
 }
 
-function initBlindsGallery() {
-    const gallery = document.getElementById('blindsGallery');
+function initBlindsGallery(galleryId, dotsId) {
+    const gallery = document.querySelector(galleryId);
     if (!gallery) return;
 
     const items = gallery.querySelectorAll('.blinds-item');
-    const dotsContainer = document.getElementById('blindsDots');
-    const prevBtn = document.querySelector('.blinds-btn[data-dir="prev"]');
-    const nextBtn = document.querySelector('.blinds-btn[data-dir="next"]');
+    const dotsContainer = gallery.parentElement.querySelector(dotsId);
+    const prevBtn = gallery.parentElement.querySelector('.blinds-btn[data-dir="prev"]');
+    const nextBtn = gallery.parentElement.querySelector('.blinds-btn[data-dir="next"]');
     let currentIndex = 0;
     let autoPlayTimer = null;
     let isAnimating = false;
